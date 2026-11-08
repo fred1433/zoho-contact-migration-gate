@@ -118,7 +118,7 @@ export function runChecks({ reference, readback, decisionLog, openCases = [], ar
     { id: 'identities', name: 'Source identities', pass: identitiesPass,
       detail: identitiesPass ? `All ${fmt(sources)} source IDs reach one record or one written reason.` : identityDetail({ countMatches, missing, duplicated, wrongGroups, stray, badExclusions }) },
     { id: 'values', name: 'Field values', pass: !valueProblems.length,
-      detail: valueProblems.length ? `${fmt(valueProblems.length)} value${valueProblems.length > 1 ? 's' : ''} did not read back as expected. First: ${describeValue(valueProblems[0])}.`
+      detail: valueProblems.length ? `${valueProblems.length > 1 ? `${fmt(valueProblems.length)} value problems` : 'One value problem'}. First: ${describeValue(valueProblems[0])}.`
         : `${fmt(valuesCompared)} values read back, compared one by one.${waiting ? ` ${fmt(waiting)} ${waiting > 1 ? 'people wait' : 'person waits'} for a record first.` : ''}` },
     { id: 'open', name: 'Open cases', pass: !open.blocking.length,
       detail: open.blocking.length ? `${open.blocking.length} open case${open.blocking.length > 1 ? 's' : ''} touch${open.blocking.length > 1 ? '' : 'es'} this operation. First: ${open.blocking[0].name}: ${open.blocking[0].reason}` : `${openCases.length ? `${open.isolated} open, none touching this operation.` : 'No open case touches this operation.'}` },
@@ -168,7 +168,7 @@ export function plainWords(r) {
       : merged.length ? 'Undo the grouping rule, rebuild the batch and rerun the check.'
       : 'Remove the extra record and rerun the check.';
   } else if (failed.includes('values')) {
-    line = `${lead} ${r.value_problems.length > 1 ? `${fmt(r.value_problems.length)} values did not read back. First: ` : 'One value did not read back: '}${describeValue(r.value_problems[0])}.`;
+    line = `${lead} ${r.value_problems.length > 1 ? `${fmt(r.value_problems.length)} value problems. First: ` : 'One value did not read back: '}${describeValue(r.value_problems[0])}.`;
     next = 'Find where that value was dropped, fix the field map and rerun the check.';
   } else if (failed.includes('open')) {
     line = `${lead} ${r.open_blocking[0].name} is still an open case, and this merge touches it.`;
