@@ -1,0 +1,14 @@
+{
+  "name": "zoho-contact-migration-gate",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A go / hold check for a Google Contacts to Zoho CRM migration, rehearsed on 11,000 fictional contacts.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "generate": "node gate.js generate",
+    "rehearse": "node gate.js rehearse",
+    "test": "node --test test/",
+    "build": "node scripts/build-site.js"
+  }
+}

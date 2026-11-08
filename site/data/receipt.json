@@ -1,0 +1,17 @@
+{
+  "target": "local stand-in built from the Zoho API documentation, not Zoho",
+  "created": 10800,
+  "updated": 80,
+  "rejected": 0,
+  "replayed": 0,
+  "largest_write_batch": 100,
+  "records_read_back": 10880,
+  "pages_read": 55,
+  "last_page": {
+    "count": 80,
+    "more_records": false
+  },
+  "merge_calls": 0,
+  "delete_calls": 0,
+  "calls": 244
+}

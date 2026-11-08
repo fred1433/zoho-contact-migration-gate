@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Hold the merge | Zoho contact migration gate</title>
+<meta name="description" content="A one-page go or hold sheet for moving 11,000 fictional Google contacts into Zoho CRM. The totals match, one person is missing, and the check says who.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <p class="scope">11,000 fictional source contacts · local rehearsal</p>
+
+  <div class="book" id="book" data-state="hold">
+    <article class="sheet">
+      <header class="verdict" aria-live="polite">
+        <div class="signal" aria-hidden="true"><i class="lens red"></i><i class="lens green"></i></div>
+        <div class="words">
+          <h1 data-slot="title">Hold the merge</h1>
+          <p class="line" data-slot="line">The count matches. Maya Chen is missing, and Alex Reed appears twice.</p>
+          <p class="why" data-slot="why" hidden></p>
+        </div>
+      </header>
+
+      <dl class="steps">
+        <div><dt>Technician's next step:</dt><dd data-slot="next">Recover Maya's record from the snapshot and rerun the check.</dd></div>
+        <div><dt>Owner action:</dt><dd data-slot="owner">None.</dd></div>
+      </dl>
+
+      <div class="act">
+        <button id="run" type="button" data-next="intact">Run the check on the intact copy</button>
+        <p class="status" id="status" role="status"></p>
+      </div>
+
+      <div class="ledgers">
+        <ul class="ledger" data-slot="sources"><li class="sum"><span>Source contacts</span><i></i><b>11,000</b></li><li class=""><span>Individual records</span><i></i><b>10,780</b></li><li class=""><span>In 100 merge groups</span><i></i><b>200</b></li><li class=""><span>Excluded with a written reason</span><i></i><b>20</b></li><li class=""><span>Open cases</span><i></i><b>0</b></li></ul>
+        <ul class="ledger" data-slot="targets"><li class="sum"><span>Records after this batch</span><i></i><b>10,880</b></li><li class=""><span>From individual records</span><i></i><b>10,780</b></li><li class=""><span>From merge groups</span><i></i><b>100</b></li><li class="split"><span>In the Zoho snapshot, matched</span><i></i><b>80</b></li><li class=""><span>New records to create</span><i></i><b>10,800</b></li></ul>
+      </div>
+
+      <ul class="checks" data-slot="checks"><li class="fail"><div class="row"><span>Source identities</span><i></i><b>Failed</b></div><p>Missing: Maya Chen. Twice: Alex Reed.</p></li><li class="pass"><div class="row"><span>Field values</span><i></i><b>Passed</b></div><p>34,308 values read back, compared one by one. 2 people wait for a record first.</p></li><li class="pass"><div class="row"><span>Open cases</span><i></i><b>Passed</b></div><p>No open case touches this operation.</p></li><li class="pass"><div class="row"><span>Archive unchanged</span><i></i><b>Passed</b></div><p>Matches the fingerprint taken before the merge decisions. That shows the files have not changed, not that a restore works.</p></li></ul>
+
+      <p class="fine"><span data-slot="operation">Operation: merge and import. Batch: rehearsal-01.</span> This verdict covers this one reconciliation of fictional data, built with common Google Contacts export edge cases. It is not a promise of zero loss. It shows what was compared and how. Not in the archive: contact photos, Zoho attachments, Zoho activities and emails, Zoho custom modules, Google &quot;Other contacts&quot;. Same check in both states: verify.js, SHA-256 <span id="code" title="9074e6fde9218d95eebc46226500dc0cf01fa51331121114714597028dcc80d1">9074e6fde9218d95</span>.</p>
+    </article>
+    <ol class="tabs" id="tabs" aria-hidden="true"><li data-letter="A" style="flex-grow:692" title="692 people, last name A"><span>A</span></li><li data-letter="B" style="flex-grow:885" title="885 people, last name B"><span>B</span></li><li data-letter="C" style="flex-grow:723" class="flag" title="723 people, last name C"><span>C</span><em>−1</em></li><li data-letter="D" style="flex-grow:549" title="549 people, last name D"><span>D</span></li><li data-letter="E" style="flex-grow:427" title="427 people, last name E"><span>E</span></li><li data-letter="F" style="flex-grow:504" title="504 people, last name F"><span>F</span></li><li data-letter="G" style="flex-grow:446" title="446 people, last name G"><span>G</span></li><li data-letter="H" style="flex-grow:671" title="671 people, last name H"><span>H</span></li><li data-letter="I" style="flex-grow:212" title="212 people, last name I"><span>I</span></li><li data-letter="J" style="flex-grow:267" title="267 people, last name J"><span>J</span></li><li data-letter="K" style="flex-grow:536" title="536 people, last name K"><span>K</span></li><li data-letter="L" style="flex-grow:462" title="462 people, last name L"><span>L</span></li><li data-letter="M" style="flex-grow:653" title="653 people, last name M"><span>M</span></li><li data-letter="N" style="flex-grow:334" title="334 people, last name N"><span>N</span></li><li data-letter="O" style="flex-grow:364" title="364 people, last name O"><span>O</span></li><li data-letter="P" style="flex-grow:353" title="353 people, last name P"><span>P</span></li><li data-letter="Q" style="flex-grow:61" title="61 people, last name Q"><span>Q</span></li><li data-letter="R" style="flex-grow:480" class="flag" title="480 people, last name R"><span>R</span><em>+1</em></li><li data-letter="S" style="flex-grow:976" title="976 people, last name S"><span>S</span></li><li data-letter="T" style="flex-grow:348" title="348 people, last name T"><span>T</span></li><li data-letter="U" style="flex-grow:40" title="0 people, last name U"><span>U</span></li><li data-letter="V" style="flex-grow:218" title="218 people, last name V"><span>V</span></li><li data-letter="W" style="flex-grow:354" title="354 people, last name W"><span>W</span></li><li data-letter="X" style="flex-grow:40" title="0 people, last name X"><span>X</span></li><li data-letter="Y" style="flex-grow:211" title="211 people, last name Y"><span>Y</span></li><li data-letter="Z" style="flex-grow:154" title="154 people, last name Z"><span>Z</span></li></ol>
+  </div>
+
+  <section class="evidence" aria-labelledby="evidence-title">
+    <h2 id="evidence-title">Evidence</h2>
+    <div class="columns">
+      <div>
+        <h3>The two lines</h3>
+        <ul class="plain" data-slot="lines"><li class="bad"><div class="row"><span>Chen, Maya</span><i></i><b>missing</b></div><p>Source c7100000008835 reaches no record.</p></li><li class="bad"><div class="row"><span>Reed, Alex</span><i></i><b>twice</b></div><p>Source c7100000001859 reaches 2 records: 5725767000001001771, 5725767000001008675.</p></li></ul>
+      </div>
+      <div>
+        <h3>The Zoho receipt</h3>
+        <p class="nolive">no live Zoho test</p>
+        <p>This rehearsal has not touched a real Zoho account. The import and the read-back ran on a local stand-in built from Zoho's API documentation.</p>
+        <ul class="ledger small"><li><span>Created</span><i></i><b>10,800</b></li><li><span>Updated</span><i></i><b>80</b></li><li><span>Rejected</span><i></i><b>0</b></li><li><span>Largest write batch</span><i></i><b>100</b></li><li><span>Pages read back</span><i></i><b>55</b></li><li><span>Last page</span><i></i><b>80 records, no more</b></li><li><span>Zoho merge calls</span><i></i><b>0</b></li></ul>
+      </div>
+      <div>
+        <h3>The repository</h3>
+        <p>The archive, the merge decision log, the field map, the Zapier plan (its scenarios are simulated) and one test per fault, from a shared family email to a lost phone extension.</p>
+        <p><a href="https://github.com/fred1433/zoho-contact-migration-gate">github.com/fred1433/zoho-contact-migration-gate</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>
+  <p>Frederic de Lavenne de Choulot, The AI Pipe.</p>
+  <p><a href="https://cal.theaipipe.com">Spend 15 minutes on what to verify before a first merge</a></p>
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

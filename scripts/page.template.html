@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Hold the merge | Zoho contact migration gate</title>
+<meta name="description" content="A one-page go or hold sheet for moving 11,000 fictional Google contacts into Zoho CRM. The totals match, one person is missing, and the check says who.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <p class="scope">11,000 fictional source contacts · local rehearsal</p>
+
+  <div class="book" id="book" data-state="hold">
+    <article class="sheet">
+      <header class="verdict" aria-live="polite">
+        <div class="signal" aria-hidden="true"><i class="lens red"></i><i class="lens green"></i></div>
+        <div class="words">
+          <h1 data-slot="title">{{title}}</h1>
+          <p class="line" data-slot="line">{{line}}</p>
+          <p class="why" data-slot="why" hidden>{{why}}</p>
+        </div>
+      </header>
+
+      <dl class="steps">
+        <div><dt>Technician's next step:</dt><dd data-slot="next">{{next}}</dd></div>
+        <div><dt>Owner action:</dt><dd data-slot="owner">{{owner}}</dd></div>
+      </dl>
+
+      <div class="act">
+        <button id="run" type="button" data-next="intact">Run the check on the intact copy</button>
+        <p class="status" id="status" role="status"></p>
+      </div>
+
+      <div class="ledgers">
+        <ul class="ledger" data-slot="sources">{{sources}}</ul>
+        <ul class="ledger" data-slot="targets">{{targets}}</ul>
+      </div>
+
+      <ul class="checks" data-slot="checks">{{checks}}</ul>
+
+      <p class="fine"><span data-slot="operation">{{operation}}</span> This verdict covers this one reconciliation of fictional data, built with common Google Contacts export edge cases. It is not a promise of zero loss. It shows what was compared and how. Not in the archive: {{not_covered}}. Same check in both states: verify.js, SHA-256 <span id="code" title="{{code_full}}">{{code}}</span>.</p>
+    </article>
+    <ol class="tabs" id="tabs" aria-hidden="true">{{tabs}}</ol>
+  </div>
+
+  <section class="evidence" aria-labelledby="evidence-title">
+    <h2 id="evidence-title">Evidence</h2>
+    <div class="columns">
+      <div>
+        <h3>The two lines</h3>
+        <ul class="plain" data-slot="lines">{{lines}}</ul>
+      </div>
+      <div>
+        <h3>The Zoho receipt</h3>
+        <p class="nolive">no live Zoho test</p>
+        <p>This rehearsal has not touched a real Zoho account. The import and the read-back ran on a local stand-in built from Zoho's API documentation.</p>
+        <ul class="ledger small">{{receipt}}</ul>
+      </div>
+      <div>
+        <h3>The repository</h3>
+        <p>The archive, the merge decision log, the field map, the Zapier plan (its scenarios are simulated) and one test per fault, from a shared family email to a lost phone extension.</p>
+        <p><a href="https://github.com/fred1433/zoho-contact-migration-gate">github.com/fred1433/zoho-contact-migration-gate</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>
+  <p>Frederic de Lavenne de Choulot, The AI Pipe.</p>
+  <p><a href="https://cal.theaipipe.com">Spend 15 minutes on what to verify before a first merge</a></p>
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>
