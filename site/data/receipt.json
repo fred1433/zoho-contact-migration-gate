@@ -1,9 +1,14 @@
 {
+  "run_date": "2026-11-08",
   "target": "local stand-in built from the Zoho API documentation, not Zoho",
   "created": 10800,
   "updated": 80,
   "rejected": 0,
   "replayed": 0,
+  "already_present": 0,
+  "found_before_replay": 0,
+  "rate_retries": 0,
+  "accounts_created": 5,
   "largest_write_batch": 100,
   "records_read_back": 10880,
   "pages_read": 55,
@@ -13,5 +18,5 @@
   },
   "merge_calls": 0,
   "delete_calls": 0,
-  "calls": 244
+  "calls": 246
 }

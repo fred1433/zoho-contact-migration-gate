@@ -115,3 +115,54 @@ test('the durable map keeps account and source ID together', () => {
   s.poll().forEach((e) => s.applyEvent(e));
   assert.ok(s.map.has('account-b|g1'));
 });
+
+test('simulated: 51 changes to linked contacts between two reads, reconciliation leaves none stale', () => {
+  const s = new SyncSim();
+  for (let i = 1; i <= 51; i++) s.googleSave(`g${i}`, person(i));
+  s.poll().forEach((e) => s.applyEvent(e));
+  s.reconcile();
+  for (let i = 1; i <= 51; i++) s.googleSave(`g${i}`, person(i, { Email: `new.${i}@example.com` }));
+  const seen = s.poll();
+  assert.equal(seen.length, 50);
+  seen.forEach((e) => s.applyEvent(e));
+  const found = s.reconcile();
+  assert.deepEqual(found, { created: 0, updated: 1, sent_to_review: 0 });
+  assert.equal([...s.zoho.values()].filter((z) => !z.Email.startsWith('new.')).length, 0);
+  assert.deepEqual(s.reconcile(), { created: 0, updated: 0, sent_to_review: 0 });
+});
+
+for (const [order, first] of [['the Google event first', 'google'], ['the Zoho event first', 'zoho']]) {
+  test(`simulated: same field edited on both sides, ${order}: both values kept, nothing goes back`, () => {
+    const s = new SyncSim();
+    s.googleSave('g1', person(1, { Phone: '(415) 555-0101' }));
+    s.poll().forEach((e) => s.applyEvent(e));
+    const zid = s.map.get('demo|g1');
+    s.zohoEdit(zid, { Phone: '(415) 555-0102' });
+    s.googleSave('g1', person(1, { Phone: '(415) 555-0103' }));
+    if (first === 'google') s.poll().forEach((e) => s.applyEvent(e));
+    assert.equal(s.writeBackFromZoho(zid), 'blocked-conflict');
+    if (first === 'zoho') s.poll().forEach((e) => s.applyEvent(e));
+    assert.equal(s.google.get('g1').Phone, '(415) 555-0103');
+    assert.equal(s.zoho.get(zid).Phone, '(415) 555-0102');
+    assert.deepEqual(s.zoho.get(zid).Conflict_Values.Phone, { google: '(415) 555-0103', zoho: '(415) 555-0102' });
+    assert.equal(s.review.filter((r) => r.type === 'conflict').length, 1);
+    assert.equal(s.writes.google_written, 0);
+    assert.equal(s.writeBackFromZoho(zid), 'blocked-conflict');
+    s.resolveConflict('demo|g1', 'Phone', '(415) 555-0103');
+    assert.equal(s.review.length, 0);
+    assert.equal(s.zoho.get(zid).Phone, '(415) 555-0103');
+    assert.equal(s.writeBackFromZoho(zid), 'ignored-echo');
+  });
+}
+
+test('simulated: Google adds Mobile, a city and a second email: applied, never read as an echo', () => {
+  const s = new SyncSim();
+  s.googleSave('g1', person(1));
+  s.poll().forEach((e) => s.applyEvent(e));
+  s.googleSave('g1', person(1, { Mobile: '(415) 555-0110', Mailing_City: 'Salem', Secondary_Email: 'b@example.com' }));
+  assert.deepEqual(s.poll().map((e) => s.applyEvent(e)), ['applied']);
+  const z = s.zoho.get(s.map.get('demo|g1'));
+  assert.equal(z.Mobile, '(415) 555-0110');
+  assert.equal(z.Mailing_City, 'Salem');
+  assert.equal(z.Secondary_Email, 'b@example.com');
+});

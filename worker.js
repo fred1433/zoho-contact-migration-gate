@@ -1,5 +1,4 @@
-// Gabarit : remplacer zoho-contact-migration-gate. Sert site/ sous https://theaipipe.com/demos/zoho-contact-migration-gate/ (static files only).
-// The route is more specific than the galerie-presell route theaipipe.com/demos/*, so it wins.
+// Serves the static files in site/ under theaipipe.com/demos/zoho-contact-migration-gate/.
 const BASE = '/demos/zoho-contact-migration-gate';
 export default {
   async fetch(request, env) {

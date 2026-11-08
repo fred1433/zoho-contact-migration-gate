@@ -33,6 +33,8 @@ if (cmd === 'generate') {
   writeFileSync('archive/google-contacts.csv', g.csv);
   writeFileSync('archive/google-contact-ids.json', g.ids);
   writeFileSync('archive/zoho-snapshot.json', g.zoho);
+  // Frozen here and only here. rehearse never writes this file, so it cannot certify an archive changed after this point.
+  writeFileSync('archive/manifest.json', JSON.stringify(fingerprint(g), null, 2));
   writeFileSync('reference/reference.json', JSON.stringify(g.reference));
   console.log(`Wrote ${g.planned.plan.length} source contacts and ${g.planned.zoho.length} Zoho snapshot records.`);
 } else if (cmd === 'rehearse') {
@@ -63,7 +65,7 @@ if (cmd === 'generate') {
   } else {
     state = { reference, readback: JSON.parse(read('out/readback.json')), decisionLog: JSON.parse(read('out/decision-log.json')), openCases: JSON.parse(read('out/open-cases.json')) };
   }
-  state.archive = { recorded: state.decisionLog.archive_fingerprint, actual: fingerprint(archive) };
+  state.archive = { recorded: JSON.parse(read('archive/manifest.json')), actual: fingerprint(archive) };
   if (copy === 'held') state.readback = replacePersonWithDuplicate(reference, state.readback, 'Maya Chen', 'Alex Reed').readback;
   if (fault && fault !== 'wrong-merge') state = applyFault(fault, state);
   const result = runChecks(state);
@@ -71,9 +73,9 @@ if (cmd === 'generate') {
   console.log(`${words.title}\n${words.line}\nTechnician's next step: ${words.next}\nOwner action: ${words.owner}\n`);
   console.log(`Operation: ${result.operation.name}. Batch: ${result.operation.batch}. Fictional data, this reconciliation only.`);
   const t = result.tally;
-  console.log(`Sources ${t.sources} = ${t.individual} individual + ${t.merged} in ${t.groups} groups + ${t.excluded} excluded + ${t.open} open`);
+  console.log(`Sources ${t.sources} = ${t.individual} individual + ${t.merged} in ${t.groups} groups + ${t.excluded} excluded + ${t.open} open${t.holds ? `, with ${t.holds} hold on a record already placed` : ''}`);
   console.log(`Target records ${t.targets}, of which ${t.already_in_zoho} already in Zoho and ${t.creations} new\n`);
-  for (const c of result.checks) console.log(`${c.pass ? 'pass' : 'FAIL'}  ${c.name}: ${c.detail}`);
+  for (const c of result.checks) console.log(`${c.pass ? (c.partial ? 'part' : 'pass') : 'FAIL'}  ${c.name}: ${c.detail}`);
   for (const name of ['Maya Chen', 'Alex Reed']) { const tr = tracePerson(reference, state.readback, name); console.log(`${name}: source ${tr.source_ids.join(', ')} on ${tr.records.length} record(s)`); }
   process.exit(result.verdict === 'GO' ? 0 : 1);
 } else if (cmd === 'restore-drill') {
@@ -89,6 +91,11 @@ if (cmd === 'generate') {
   const rec = s.reconcile();
   s.googleDelete('g1');
   const rec2 = s.reconcile();
+  for (let i = 2; i <= 51; i++) s.googleSave(`g${i}`, { First_Name: 'Sim', Last_Name: `Contact ${i}`, Email: `sim.${i}.new@example.com` });
+  s.googleSave('g52', { First_Name: 'Sim', Last_Name: 'Contact 52', Email: 'sim.52@example.com' });
+  const third = s.poll(); third.forEach((e) => s.applyEvent(e));
+  const rec3 = s.reconcile();
   console.log(`SIMULATED. 51 contacts created between two reads: poll returned ${seen.length}, created ${afterPoll}, reconciliation found ${rec.created} more.`);
-  console.log(`SIMULATED. One Google deletion: ${rec2.sent_to_review} sent to review, Zoho still holds ${s.zoho.size} records.`);
+  console.log(`SIMULATED. One Google deletion: ${rec2.sent_to_review} sent to review, Zoho still holds ${s.zoho.size - 1} records before the next step.`);
+  console.log(`SIMULATED. 51 changes between two reads: poll returned ${third.length}, reconciliation found ${rec3.created + rec3.updated} more.`);
 } else die(`Unknown command: ${cmd}`);

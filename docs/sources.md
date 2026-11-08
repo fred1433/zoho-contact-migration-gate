@@ -21,7 +21,9 @@
 
 ## What has not been checked
 
-- **No live Zoho test.** Every Zoho behaviour above is documented, none was observed here. The stand-in may differ from the real API, especially on custom fields, field lengths, lookups and notes.
-- **No export from a real Google account.** The ` ::: ` separator inside cells is modeled from general knowledge and did not appear in the public samples read. Export five contacts from a test account first and confirm it, along with where a real export holds phone extensions.
+- **No live Zoho test.** Every Zoho behaviour above is documented, none was observed here. The stand-in may differ from the real API, especially on custom fields, field lengths, picklists, lookups, notes and `DUPLICATE_DATA`. It rejects only a missing `Last_Name`, a batch over the limit and a bad ID, so its `Rejected 0` proves little about Zoho.
+- **Accounts.** The rehearsal creates each new company through `/Accounts` before linking contacts by ID. That order is the plan, and the shape of the call has not been observed on Zoho.
+- **Rate limits.** A 429 is retried at once in the rehearsal. A real run would wait for the time Zoho gives.
+- **No export from a real Google account.** The ` ::: ` separator inside cells is modeled from general knowledge and did not appear in the public samples read. A five-contact export from a test account would confirm it, along with where a real export holds phone extensions. Columns such as Website or Relation are not in the table, so a real export holding them stops at the check until a rule is written.
 - **Nothing ran on Zapier.**
 - **The numbers** (10,780, 100 groups, 80 already in Zoho) are choices for the demonstration.

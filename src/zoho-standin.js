@@ -5,6 +5,7 @@ const FIELD_LIMIT = 50;
 export class ZohoStandIn {
   constructor(seed = []) {
     this.records = new Map();
+    this.accounts = new Map();
     this.nextId = 5725767000001000000n;
     this.calls = [];
     this.tokens = new Map();
@@ -14,6 +15,7 @@ export class ZohoStandIn {
 
   request(method, path, { params = {}, data } = {}) {
     this.calls.push({ method, path, records: data?.length ?? 0, params: Object.fromEntries(Object.entries(params).filter(([k]) => k !== 'fields')) });
+    if (method === 'POST' && path === '/Accounts') return this.write(data, (rec) => { const id = this.newId(); this.accounts.set(id, { id, ...rec }); return { code: 'SUCCESS', details: { id }, message: 'record added', status: 'success' }; }, 201);
     if (method === 'POST' && path === '/Contacts') return this.write(data, (rec) => this.insert(rec), 201);
     if (method === 'PUT' && path === '/Contacts') return this.write(data, (rec) => this.update(rec), 200);
     if (method === 'POST' && path === '/Contacts/upsert') return this.upsert(data, params.duplicate_check_fields);
@@ -71,6 +73,7 @@ export class ZohoStandIn {
       if (offset >= 2000) return { status: 400, body: { code: 'DISCRETE_PAGINATION_LIMIT_EXCEEDED', message: 'You can only get the first 2000 records without using page_token param.' } };
     }
     const all = [...this.records.values()];
+    if (!all.length) return { status: 204, body: {} };
     const slice = all.slice(offset, offset + per_page);
     const more = offset + per_page < all.length;
     const info = { per_page, count: slice.length, more_records: more, next_page_token: null };

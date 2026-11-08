@@ -13,27 +13,30 @@ const reference = JSON.parse(readFileSync('reference/reference.json', 'utf8'));
 const run = rehearse(archive);
 const { readback: held, patch } = replacePersonWithDuplicate(reference, run.readback, 'Maya Chen', 'Alex Reed');
 const openCases = openCasesFrom(run.pending);
-const result = runChecks({ reference, readback: held, decisionLog: run.decisionLog, openCases, archive: { recorded: run.decisionLog.archive_fingerprint, actual: fingerprint(archive) } });
+const result = runChecks({ reference, readback: held, decisionLog: run.decisionLog, openCases, archive: { recorded: JSON.parse(readFileSync('archive/manifest.json', 'utf8')), actual: fingerprint(archive) } });
 if (result.verdict !== 'HOLD') throw new Error('The held copy should hold.');
+const intactResult = runChecks({ reference, readback: run.readback, decisionLog: run.decisionLog, openCases, archive: { recorded: JSON.parse(readFileSync('archive/manifest.json', 'utf8')), actual: fingerprint(archive) } });
+if (intactResult.verdict !== 'GO') throw new Error(`The intact copy should pass: ${intactResult.checks.filter((c) => !c.pass).map((c) => c.detail).join(' ')}`);
 
 mkdirSync('site/data/archive', { recursive: true });
 for (const f of ['verify.js', 'render.js', 'app.js']) copyFileSync(`src/${f}`, `site/${f}`);
 copyFileSync('scripts/style.css', 'site/style.css');
-for (const f of ['google-contacts.csv', 'google-contact-ids.json', 'zoho-snapshot.json']) copyFileSync(`archive/${f}`, `site/data/archive/${f}`);
+for (const f of ['google-contacts.csv', 'google-contact-ids.json', 'zoho-snapshot.json', 'manifest.json']) copyFileSync(`archive/${f}`, `site/data/archive/${f}`);
 writeFileSync('site/data/reference.json', JSON.stringify(reference));
 writeFileSync('site/data/readback-intact.json', JSON.stringify(run.readback));
 writeFileSync('site/data/held-patch.json', JSON.stringify(patch));
 writeFileSync('site/data/decision-log.json', JSON.stringify(run.decisionLog));
 writeFileSync('site/data/open-cases.json', JSON.stringify(openCases));
-writeFileSync('site/data/receipt.json', JSON.stringify(run.receipt, null, 2));
+const runDate = process.env.RUN_DATE ?? new Date().toISOString().slice(0, 10);
+writeFileSync('site/data/receipt.json', JSON.stringify({ run_date: runDate, ...run.receipt }, null, 2));
 
 const n = (v) => v.toLocaleString('en-US');
 const r = run.receipt;
 const line = (a, b) => `<li><span>${a}</span><i></i><b>${b}</b></li>`;
 const receipt = [
-  line('Created', n(r.created)), line('Updated', n(r.updated)), line('Rejected', n(r.rejected)),
-  line('Largest write batch', n(r.largest_write_batch)), line('Pages read back', n(r.pages_read)),
-  line('Last page', `${n(r.last_page.count)} records, no more`), line('Zoho merge calls', n(r.merge_calls)),
+  line('Run date', runDate), line('Created', n(r.created)), line('Updated', n(r.updated)), line('Rejected', n(r.rejected)),
+  line('Accounts created first', n(r.accounts_created)), line('Largest write batch', n(r.largest_write_batch)), line('Pages read back', n(r.pages_read)),
+  line('Last page', `${n(r.last_page.count)} records, no more`), line('Merge calls', n(r.merge_calls)),
 ].join('');
 const codeHash = createHash('sha256').update(readFileSync('src/verify.js')).digest('hex');
 const s = slots(result, reference, held);

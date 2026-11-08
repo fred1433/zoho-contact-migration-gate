@@ -28,7 +28,7 @@ export function restoreDrill(zoho, name = 'Priya Nair') {
     target: 'isolated local stand-in, not Zoho', name, old_id: oldId, new_id: newId,
     id_changed: oldId !== newId,
     note_restored: JSON.stringify(noteBack) === JSON.stringify(Notes),
-    relation_restored: back.Account_Name?.name === original.Account_Name?.name && Boolean(back.Account_Name),
+    relation_restored: Boolean(back.Account_Name?.id) && back.Account_Name.id === original.Account_Name?.id && back.Account_Name.name === original.Account_Name.name,
     fields_restored: Object.keys(fields).every((k) => JSON.stringify(back[k]) === JSON.stringify(fields[k])),
     not_covered: NOT_COVERED,
   };

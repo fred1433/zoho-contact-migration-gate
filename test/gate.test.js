@@ -14,7 +14,7 @@ const failedIds = (r) => r.checks.filter((c) => !c.pass).map((c) => c.id);
 test('intact copy: the numbers close and the verdict is go', () => {
   const r = runChecks(intact().state);
   assert.equal(r.verdict, 'GO');
-  assert.deepEqual(r.tally, { sources: 11000, individual: 10780, merged: 200, groups: 100, excluded: 20, open: 0, targets: 10880, individual_targets: 10780, already_in_zoho: 80, creations: 10800 });
+  assert.deepEqual(r.tally, { sources: 11000, individual: 10780, merged: 200, groups: 100, excluded: 20, open: 0, holds: 0, targets: 10880, individual_targets: 10780, already_in_zoho: 80, creations: 10800 });
 });
 
 test('held copy: the total is exact and the check still names both people', () => {
@@ -28,7 +28,7 @@ test('held copy: the total is exact and the check still names both people', () =
   assert.deepEqual(plainWords(r), {
     title: 'Hold the merge',
     line: 'The count matches. Maya Chen is missing, and Alex Reed appears twice.',
-    next: "Recover Maya's record from the snapshot and rerun the check.",
+    next: "Rebuild the overwritten row from Maya's archived Google contact. Rerun the check and confirm Maya and Alex each appear once.",
     owner: 'None.',
   });
 });
@@ -63,6 +63,8 @@ test('a wrong grouping rule planted in the migration code fails the check', () =
 
 for (const [fault, only, message] of [
   ['lost-third-email', 'values', /lost/],
+  ['lost-prefix', 'values', /Dr\. \(lost\)/],
+  ['manifest-empty', 'archive', /empty or incomplete/],
   ['lost-extension', 'values', /x\d+ \(lost\)/],
   ['lost-label', 'values', /lost/],
   ['lost-and-doubled', 'values', /lost/],
@@ -92,6 +94,7 @@ test('regenerating gives the same IDs and the same files', () => {
   assert.equal(a.csv, b.csv);
   assert.equal(a.zoho, b.zoho);
   assert.deepEqual(a.reference, referenceFile());
+  assert.deepEqual(fingerprint(a), JSON.parse(readFileSync('archive/manifest.json', 'utf8')));
 });
 
 test('fictional data only: example.com, 555-01XX, no 707', () => {
@@ -118,7 +121,7 @@ test('the small phone range collides, and no collision becomes a merge', () => {
   const { reference, run } = intact();
   assert.equal(run.decisionLog.groups, 100);
   const owners = new Map();
-  for (const p of Object.values(reference.people)) for (const v of p.values) if (v.startsWith('phone:')) { owners.set(v, (owners.get(v) ?? 0) + 1); }
+  for (const p of Object.values(reference.people)) for (const v of p.values) if (v.startsWith('phone@')) { const key = v.split(':')[1]; owners.set(key, (owners.get(key) ?? 0) + 1); }
   assert.ok([...owners.values()].some((c) => c > 1), 'expected at least one shared number');
 });
 
@@ -136,7 +139,7 @@ test('command line: exit codes and argument errors', () => {
 
 test('page: opens on hold with the four lines and no fetch to Zoho', () => {
   const html = readFileSync('site/index.html', 'utf8');
-  for (const s of ['Hold the merge', 'The count matches. Maya Chen is missing, and Alex Reed appears twice.', 'Recover Maya&#39;s', 'None.', '11,000 fictional source contacts · local rehearsal', 'no live Zoho test', 'common Google Contacts export edge cases', 'Frederic de Lavenne de Choulot', 'https://cal.theaipipe.com']) {
+  for (const s of ['Hold the merge', 'The count matches. Maya Chen is missing, and Alex Reed appears twice.', "Rebuild the overwritten row from Maya's archived Google contact.", 'None.', 'Google Contacts to Zoho CRM · 11,000 fictional contacts · local rehearsal', 'Local import receipt', 'Already in Zoho, matched', 'Field values matched for', 'no live Zoho test', 'common Google Contacts export edge cases', 'Frederic de Lavenne de Choulot', 'https://cal.theaipipe.com']) {
     assert.ok(html.includes(s) || html.includes(s.replace('&#39;', "'")), s);
   }
   for (const f of ['site/index.html', 'site/app.js', 'site/verify.js', 'site/render.js']) {
@@ -145,4 +148,21 @@ test('page: opens on hold with the four lines and no fetch to Zoho', () => {
     assert.ok(!new RegExp('revers' + 'ible', 'i').test(text), f);
   }
   assert.equal((html.match(/<button/g) ?? []).length, 1);
+});
+
+test('the held sheet says how many people were compared, and names the two who were not', () => {
+  const { state, reference } = intact();
+  const { readback } = replacePersonWithDuplicate(reference, state.readback, 'Maya Chen', 'Alex Reed');
+  const r = runChecks({ ...state, readback });
+  const values = r.checks.find((c) => c.id === 'values');
+  assert.equal(values.detail, 'Field values matched for 10,878 of 10,880 people. Not compared: Maya Chen and Alex Reed.');
+  assert.equal(values.partial, true);
+  assert.equal(plainWords(runChecks(state)).title, 'Rehearsal passed');
+});
+
+test('command line: --fault open-case prints a sum that closes', () => {
+  const out = spawnSync('node', ['gate.js', 'check', '--copy', 'intact', '--fault', 'open-case'], { encoding: 'utf8' }).stdout;
+  const m = /Sources (\d+) = (\d+) individual \+ (\d+) in \d+ groups \+ (\d+) excluded \+ (\d+) open/.exec(out);
+  assert.equal(Number(m[1]), Number(m[2]) + Number(m[3]) + Number(m[4]) + Number(m[5]));
+  assert.match(out, /1 hold on a record already placed/);
 });

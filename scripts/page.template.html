@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Hold the merge | Zoho contact migration gate</title>
-<meta name="description" content="A one-page go or hold sheet for moving 11,000 fictional Google contacts into Zoho CRM. The totals match, one person is missing, and the check says who.">
+<meta name="description" content="A one-page go or hold sheet for a Zoho CRM contact import, rehearsed on 11,000 fictional contacts. The totals match, one person is missing, and the check says who.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
 </head>
 <body>
 <main>
-  <p class="scope">11,000 fictional source contacts · local rehearsal</p>
+  <p class="scope">Google Contacts to Zoho CRM · 11,000 fictional contacts · local rehearsal</p>
 
   <div class="book" id="book" data-state="hold">
     <article class="sheet">
@@ -45,7 +45,7 @@
 
       <ul class="checks" data-slot="checks">{{checks}}</ul>
 
-      <p class="fine"><span data-slot="operation">{{operation}}</span> This verdict covers this one reconciliation of fictional data, built with common Google Contacts export edge cases. It is not a promise of zero loss. It shows what was compared and how. Not in the archive: {{not_covered}}. Same check in both states: verify.js, SHA-256 <span id="code" title="{{code_full}}">{{code}}</span>.</p>
+      <p class="fine"><span data-slot="operation">{{operation}}</span> This verdict covers this one reconciliation of fictional data, built with common Google Contacts export edge cases. It is not a promise of zero loss. It shows what was compared and how.</p>
     </article>
     <ol class="tabs" id="tabs" aria-hidden="true">{{tabs}}</ol>
   </div>
@@ -58,7 +58,7 @@
         <ul class="plain" data-slot="lines">{{lines}}</ul>
       </div>
       <div>
-        <h3>The Zoho receipt</h3>
+        <h3>Local import receipt</h3>
         <p class="nolive">no live Zoho test</p>
         <p>This rehearsal has not touched a real Zoho account. The import and the read-back ran on a local stand-in built from Zoho's API documentation.</p>
         <ul class="ledger small">{{receipt}}</ul>
@@ -67,6 +67,8 @@
         <h3>The repository</h3>
         <p>The archive, the merge decision log, the field map, the Zapier plan (its scenarios are simulated) and one test per fault, from a shared family email to a lost phone extension.</p>
         <p><a href="https://github.com/fred1433/zoho-contact-migration-gate">github.com/fred1433/zoho-contact-migration-gate</a></p>
+        <p class="note">Same check in both states: verify.js, SHA-256 <span id="code" title="{{code_full}}">{{code}}</span>.</p>
+        <p class="note">Not in the archive: {{not_covered}}.</p>
       </div>
     </div>
   </section>

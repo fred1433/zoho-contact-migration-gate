@@ -51,7 +51,7 @@ h1 { font: 400 76px/1 'Young Serif', Georgia, serif; letter-spacing: -.012em; ma
 .act { margin: 20px 0 0 108px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
 button { font: 600 17px/1.2 'Libre Franklin', Arial, sans-serif; color: var(--paper); background: var(--ink); border: 0; border-radius: 3px; padding: 15px 22px; cursor: pointer; }
 button:hover { background: #000; }
-button:disabled { cursor: progress; opacity: .8; }
+button[aria-busy="true"] { cursor: progress; opacity: .8; }
 .status { margin: 0; font-size: 15px; }
 
 /* Directory lines: label, dot leader, number. */
@@ -89,6 +89,7 @@ h3 { font-size: 17px; font-weight: 700; margin: 0 0 8px; }
 .nolive { font: 400 24px/1.2 'Young Serif', Georgia, serif; }
 .ledger.small { font-size: 15px; margin-top: 4px; }
 .ledger.small li { padding: 1px 0; }
+.note { font-size: 14px; color: var(--quiet); line-height: 1.45; }
 .columns a { overflow-wrap: anywhere; font-weight: 500; }
 
 footer { max-width: 1040px; margin: 34px auto 0; padding: 16px 70px 38px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 28px; }

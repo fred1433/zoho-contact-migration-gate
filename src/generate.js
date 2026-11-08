@@ -15,12 +15,15 @@ const LABELS = ['Clients', 'Vendors', 'Newsletter', 'Family', 'Old leads', 'Boar
 const CITIES = [['Springfield', 'IL', '62701'], ['Madison', 'WI', '53703'], ['Salem', 'OR', '97301'], ['Dover', 'DE', '19901'], ['Helena', 'MT', '59601'], ['Albany', 'NY', '12207']];
 // Fictional numbers only: 555-0100 to 555-0199, across many area codes so that 100 numbers do not collide constantly.
 // 707 is left out on purpose.
+// Two Zoho accounts share this name in the snapshot. No other contact uses it.
+const HOMONYM = 'Bell and Hart';
 const AREAS = [201, 202, 203, 205, 206, 207, 208, 212, 213, 214, 215, 216, 217, 218, 219, 224, 225, 228, 229, 231, 234, 239, 240, 248, 251, 252, 253, 254, 256, 260, 262, 267, 269, 270, 276, 281, 301, 302, 303, 304, 305, 307, 308, 309, 310, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 323, 325, 330, 334, 336];
 
 function rng(seed) {
   let a = seed >>> 0;
   return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
+export const ACCOUNT = 'demo';
 const ascii = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 export function formatPhone(area, line, style, ext = '') {
@@ -49,7 +52,7 @@ export function makePlan(seed = 20261108) {
     }
   };
   const nextPerson = () => `P-${String(++personNo).padStart(5, '0')}`;
-  const blank = (given, family) => ({ given, family, middle: '', prefix: '', suffix: '', org: '', title: '', notes: '', labels: [], emails: [], phones: [], addresses: [] });
+  const blank = (given, family) => ({ given, family, middle: '', prefix: '', suffix: '', nickname: '', phoneticFirst: '', phoneticMiddle: '', phoneticLast: '', fileAs: '', org: '', title: '', department: '', birthday: '', notes: '', labels: [], emails: [], phones: [], addresses: [] });
   const randomName = () => {
     for (;;) { const g = pick(GIVEN), f = pick(FAMILY); if (!reserved.has(ascii(`${g} ${f}`))) return [g, f]; }
   };
@@ -66,6 +69,12 @@ export function makePlan(seed = 20261108) {
     if (r() < 0.06) c.notes = pick(['Met at the spring dinner.', 'Prefers email.', 'Asked to be called after 3pm.', 'Sent the holiday card.']);
     if (r() < 0.05) c.middle = pick(['J.', 'Lee', 'Marie']);
     if (r() < 0.04) c.prefix = 'Dr.';
+    if (r() < 0.01) c.suffix = pick(['Jr.', 'III']);
+    if (r() < 0.02) c.nickname = pick(['Bee', 'Sunny', 'Doc']);
+    if (r() < 0.005) { c.phoneticFirst = ascii(g); c.phoneticLast = ascii(f); }
+    if (r() < 0.005) c.fileAs = `${f}, ${g}`;
+    if (c.org && r() < 0.15) c.department = pick(['Billing', 'Front desk', 'Operations']);
+    if (r() < 0.03) c.birthday = `19${60 + Math.floor(r() * 30)}-0${1 + Math.floor(r() * 9)}-1${Math.floor(r() * 9)}`;
     if (r() < 0.12) { const [city, st, zip] = pick(CITIES); c.addresses.push({ label: 'Home', street: `${100 + Math.floor(r() * 8900)} Elm St`, city, region: st, postal: zip, country: 'US' }); }
     return c;
   };
@@ -130,6 +139,12 @@ export function makePlan(seed = 20261108) {
     c.addresses = [1, 2, 3].map((n) => { const [city, st, zip] = pick(CITIES); return { label: n === 1 ? 'Home' : 'Work', street: `${n}${100 + i} Pine Ave`, city, region: st, postal: zip, country: 'US' }; });
     add(c, nextPerson());
   }
+  // An address with no street, and one with a PO box.
+  for (let i = 0; i < 10; i++) {
+    const c = person(); const [city, st, zip] = pick(CITIES);
+    c.addresses = [i % 2 ? { label: 'Work', street: '', city, region: st, postal: '', country: 'US' } : { label: 'Work', street: `${i + 1} Mill Rd`, city, region: st, postal: zip, country: 'US', pobox: `PO Box ${100 + i}` }];
+    add(c, nextPerson());
+  }
   // Phone extensions.
   for (let i = 0; i < 60; i++) {
     const c = person(); c.phones = [newPhone(c.given, c.family, 'Work', String(200 + i))]; add(c, nextPerson());
@@ -167,11 +182,24 @@ export function makePlan(seed = 20261108) {
   for (let i = plan.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [plan[i], plan[j]] = [plan[j], plan[i]]; }
   plan.forEach((e, i) => { e.source_id = `c${7100000000000 + i + 1}`; });
 
+  // Zoho holds its own values on fields where Google has nothing, so the import has something it must not overwrite.
   const zoho = [];
+  const accountIds = new Map();
+  let homonyms = 0;
+  const accountFor = (name) => {
+    if (name === HOMONYM) return String(5725767000000950000n + BigInt(++homonyms));
+    if (!accountIds.has(name)) accountIds.set(name, String(5725767000000900000n + BigInt(accountIds.size + 1)));
+    return accountIds.get(name);
+  };
   const zohoFrom = (e, note, withAccount) => {
-    const c = e.contact;
-    zoho.push({ id: String(5725767000000100000n + BigInt(zoho.length + 1)), First_Name: c.given, Last_Name: c.family, Email: c.emails[0].value,
-      ...(withAccount && c.org ? { Account_Name: { name: c.org, id: String(5725767000000900000n + BigInt(zoho.length + 1)) } } : {}), Notes: [note] });
+    const c = e.contact, n = zoho.length;
+    const rec = { id: String(5725767000000100000n + BigInt(n + 1)), First_Name: c.given, Last_Name: c.family, Email: c.emails[0].value };
+    if (withAccount && c.org) rec.Account_Name = { name: c.org, id: accountFor(c.org) };
+    if (!c.notes && n % 3 === 0) rec.Description = 'Renewal handled by the sales desk.';
+    if (!c.phones.length && n % 3 === 1) rec.Mobile = formatPhone(202, String(100 + (n % 100)).padStart(4, '0'), 0);
+    if (!c.title && n % 3 === 2) rec.Title = 'Account manager';
+    rec.Notes = [note];
+    zoho.push(rec);
   };
   const priyaEntry = plan.find((e) => e.person === priyaId);
   zohoFrom(priyaEntry, 'Asked for the spring invoice to go to the clinic.', true);
@@ -185,6 +213,7 @@ export function makePlan(seed = 20261108) {
     const c = e.contact;
     if (!c.emails.length || ['maya chen', 'alex reed'].includes(ascii(`${c.given} ${c.family}`))) continue;
     if (c.emails[0].value.includes(' ::: ') || sharedEmails.get(c.emails[0].value.toLowerCase()) > 1) continue;
+    if (!c.org && homonyms < 2) { c.org = HOMONYM; zohoFrom(e, 'Existing Zoho note, kept as is.', true); e.zoho_id = zoho[zoho.length - 1].id; continue; }
     zohoFrom(e, 'Existing Zoho note, kept as is.', zoho.length % 4 === 0);
     e.zoho_id = zoho[zoho.length - 1].id;
   }
@@ -203,13 +232,13 @@ export function renderArchive({ plan, zoho }) {
   for (let i = 1; i <= nA; i++) { header.push(`Address ${i} - Label`); for (const p of ADDRESS_PARTS) header.push(`Address ${i} - ${p}`); }
   const rows = [header];
   for (const { contact: c } of plan) {
-    const row = [c.given, c.middle, c.family, '', '', '', c.prefix, c.suffix, '', '', c.org, c.title, '', '', c.notes, '', [...c.labels, '* myContacts'].join(' ::: ')];
+    const row = [c.given, c.middle, c.family, c.phoneticFirst ?? '', c.phoneticMiddle ?? '', c.phoneticLast ?? '', c.prefix, c.suffix, c.nickname ?? '', c.fileAs ?? '', c.org, c.title, c.department ?? '', c.birthday ?? '', c.notes, '', [...c.labels, '* myContacts'].join(' ::: ')];
     for (let i = 0; i < nE; i++) row.push(c.emails[i]?.label ?? '', c.emails[i]?.value ?? '');
     for (let i = 0; i < nP; i++) row.push(c.phones[i]?.label ?? '', c.phones[i]?.value ?? '');
     for (let i = 0; i < nA; i++) {
       const a = c.addresses[i];
       if (!a) { row.push('', '', '', '', '', '', '', '', ''); continue; }
-      row.push(a.label, `${a.street}, ${a.city} ${a.region} ${a.postal}`, a.street, a.city, '', a.region, a.postal, a.country, '');
+      row.push(a.label, [a.street, a.city, a.region, a.postal].filter(Boolean).join(' '), a.street, a.city, a.pobox ?? '', a.region, a.postal, a.country, a.extended ?? '');
     }
     rows.push(row);
   }
@@ -220,29 +249,67 @@ export function renderArchive({ plan, zoho }) {
   };
 }
 
-// The answer key. It reads the plan, never the CSV, so a bug in parsing or merging cannot also bend the key.
+// The answer key. It reads the plan and the snapshot, never the CSV, so a bug in parsing or merging cannot also bend the key.
+const mixedCase = (n) => n !== n.toUpperCase() && n !== n.toLowerCase();
+const truthOf = (raw) => { const d = raw.replace(/\D/g, ''); return `+1${d.length === 11 ? d.slice(1) : d}`; };
+const SLOT = { work: 'Phone', mobile: 'Mobile', home: 'Home_Phone', other: 'Other_Phone' };
+const SLOTS = ['Phone', 'Mobile', 'Home_Phone', 'Other_Phone'];
+
+function fromSnapshot(z) {
+  const v = [];
+  for (const f of ['Email', 'Secondary_Email']) if (z[f]) v.push(`email:${z[f].toLowerCase()}`);
+  for (const f of SLOTS) if (z[f]) v.push(`phone@${f}:${truthOf(z[f])}`);
+  if (z.Title) v.push(`title:${z.Title}`);
+  if (z.Description) v.push(`note:${z.Description}`);
+  if (z.Account_Name) v.push(`org:${z.Account_Name.name}`);
+  for (const n of z.Notes ?? []) v.push(`zoho_note:${n}`);
+  return v;
+}
+
 export function referenceFromPlan({ plan, zoho }) {
-  const sources = {}, people = {};
+  const sources = {}, people = {}, zoho_untouched = {};
   const byZoho = new Map(zoho.map((z) => [z.id, z]));
+  const phones = new Map();
   for (const e of plan) {
     if (e.kind === 'excluded') { sources[e.source_id] = { kind: 'excluded', reason: e.reason }; continue; }
-    if (e.kind === 'pending') { sources[e.source_id] = { kind: 'pending', reason: e.reason }; continue; }
+    if (e.kind === 'pending') {
+      sources[e.source_id] = { kind: 'pending', reason: e.reason };
+      if (e.zoho_id) { const z = byZoho.get(e.zoho_id); zoho_untouched[e.zoho_id] = { name: `${z.First_Name} ${z.Last_Name}`, values: [`name:${z.First_Name} ${z.Last_Name}`.normalize('NFC'), ...fromSnapshot(z)] }; }
+      continue;
+    }
     sources[e.source_id] = { kind: 'person', person: e.person };
-    const p = people[e.person] ??= { name: `${e.contact.given} ${e.contact.family}`, sources: [], values: [] };
+    const c = e.contact, full = `${c.given} ${c.family}`;
+    const p = people[e.person] ??= { name: full, sources: [], values: [] };
+    if (!mixedCase(p.name) && mixedCase(full)) p.name = full;
     p.sources.push(e.source_id);
-    const c = e.contact, v = new Set(p.values);
-    v.add(`name:${ascii(p.name)}`);
+    const v = new Set(p.values);
     for (const m of c.emails) for (const x of m.value.split(' ::: ')) v.add(`email:${x.toLowerCase()}`);
-    for (const m of c.phones) v.add(`phone:${m.truth}`);
+    if (!phones.has(e.person)) phones.set(e.person, new Map());
+    for (const m of c.phones) if (!phones.get(e.person).has(m.truth)) phones.get(e.person).set(m.truth, m.label);
     for (const l of c.labels) v.add(`label:${l}`);
-    if (c.org) v.add(`org:${c.org}`);
-    if (c.title) v.add(`title:${c.title}`);
-    if (c.notes) v.add(`note:${c.notes}`);
-    for (const a of c.addresses) v.add(`address:${a.street}|${a.city}|${a.region}|${a.postal}|${a.country}`);
-    if (e.zoho_id) { p.zoho_id = e.zoho_id; for (const n of byZoho.get(e.zoho_id).Notes) v.add(`zoho_note:${n}`); }
+    for (const [k, x] of [['org', c.org], ['title', c.title], ['department', c.department], ['birthday', c.birthday], ['note', c.notes], ['prefix', c.prefix], ['middle', c.middle], ['suffix', c.suffix], ['nickname', c.nickname], ['phonetic_first', c.phoneticFirst], ['phonetic_middle', c.phoneticMiddle], ['phonetic_last', c.phoneticLast], ['file_as', c.fileAs]]) if (x) v.add(`${k}:${x}`);
+    for (const a of c.addresses) v.add(`address:${[a.street, a.city, a.region, a.postal, a.country, a.pobox ?? '', a.extended ?? ''].join('|')}`);
+    if (e.zoho_id) {
+      const z = byZoho.get(e.zoho_id);
+      p.zoho_id = e.zoho_id;
+      if (z.Account_Name?.id) p.account_id = z.Account_Name.id;
+      for (const x of fromSnapshot(z)) v.add(x);
+    }
     p.values = [...v];
   }
-  return { sources, people };
+  for (const [pid, p] of Object.entries(people)) {
+    const taken = new Set(p.values.filter((x) => x.startsWith('phone@')).map((x) => x.slice(6).split(':')[0]));
+    const v = new Set(p.values);
+    for (const [truth, label] of phones.get(pid)) {
+      if ([...v].some((x) => x.startsWith('phone@') && x.endsWith(`:${truth}`))) continue;
+      const wanted = SLOT[label.toLowerCase()];
+      const slot = wanted && !taken.has(wanted) ? wanted : SLOTS.find((f) => !taken.has(f));
+      if (slot) { taken.add(slot); v.add(`phone@${slot}:${truth}`); } else v.add(`phone@Google_Extra_Phones:${truth}`);
+    }
+    p.values = [`name:${p.name}`.normalize('NFC'), ...v];
+    p.name = p.name.normalize('NFC');
+  }
+  return { account: ACCOUNT, sources, people, zoho_untouched };
 }
 
 export const generate = (seed) => {

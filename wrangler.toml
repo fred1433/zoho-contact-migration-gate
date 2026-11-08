@@ -1,4 +1,4 @@
-# Static page served under theaipipe.com/demos/zoho-contact-migration-gate/
+# Static site served under theaipipe.com/demos/zoho-contact-migration-gate/
 name = "zoho-contact-migration-gate-demo"
 main = "worker.js"
 compatibility_date = "2026-09-01"

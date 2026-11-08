@@ -23,10 +23,10 @@ export function slots(result, reference, readback) {
     leader('Records after this batch', n(t.targets), 'sum'),
     leader('From individual records', n(t.individual_targets)),
     leader('From merge groups', n(t.groups)),
-    leader('In the Zoho snapshot, matched', n(t.already_in_zoho), 'split'),
+    leader('Already in Zoho, matched', n(t.already_in_zoho), 'split'),
     leader('New records to create', n(t.creations)),
   ].join('');
-  const checks = result.checks.map((c) => `<li class="${c.pass ? 'pass' : 'fail'}"><div class="row"><span>${esc(c.name)}</span><i></i><b>${c.pass ? 'Passed' : 'Failed'}</b></div><p>${esc(c.detail)}</p></li>`).join('');
+  const checks = result.checks.map((c) => `<li class="${c.pass ? 'pass' : 'fail'}"><div class="row"><span>${esc(c.name)}</span><i></i><b>${c.pass ? (c.partial ? 'Partial' : 'Passed') : 'Failed'}</b></div><p>${esc(c.detail)}</p></li>`).join('');
   const lines = traces.map((tr) => {
     const where = tr.records.length === 0 ? 'no record' : tr.records.length === 1 ? `record ${tr.records[0]}` : `${tr.records.length} records: ${tr.records.join(', ')}`;
     const bad = tr.records.length !== 1;

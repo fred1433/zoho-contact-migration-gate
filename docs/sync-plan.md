@@ -20,11 +20,12 @@ All scenarios below run in `sync/sim.js` and are labeled simulated. Nothing here
 
 | Question | Rule | Test |
 |---|---|---|
-| Who wins on a conflict? | Nobody automatically. If both sides changed a field since the last sync, Zoho keeps its value, the Google value is kept beside it, and a person decides | both sides edit the same field |
+| Who wins on a conflict? | Nobody automatically. If both sides moved a field away from the last common state, in either arrival order, both values are kept, nothing goes back to Google for that contact, and a person decides | same field edited on both sides, both orders |
 | Which fields does Zoho own? | `Owner`, `Lead_Source`, `Description`. They never travel to Google | fields Zoho owns |
-| Replayed event | Same fingerprint of the synced fields, so ignored: zero creations, zero writes back | replayed event |
+| Which fields synchronize? | Every other field on the contact, so an added `Mobile` is applied and never read as an echo | Google adds Mobile |
+| Replayed event | Same content fingerprint, so ignored: zero creations, zero writes back | replayed event |
 | Loop | A round trip Google to Zoho to Google gives zero extra writes, for the same reason | round trip |
-| Missed contacts | A scheduled full comparison finds them | 51 contacts between two reads |
+| Missed contacts and missed changes | A scheduled full comparison on content fingerprints finds new contacts and changes on linked ones | 51 contacts between two reads, 51 changes to linked contacts |
 | Deleted in Google | Goes to a review line. Nothing is deleted in Zoho automatically | Google deletion |
 
 ## Match key

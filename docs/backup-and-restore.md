@@ -1,6 +1,6 @@
 # Backup and restore
 
-A fingerprint shows that archived bytes have not changed. It does not show that recovery works. The drill does that part.
+A fingerprint shows that archived bytes have not changed. It does not show that recovery works. The drill does that part. The fingerprint is frozen by `generate` in `archive/manifest.json`, and `rehearse` never writes that file.
 
 Before any merge or deletion:
 

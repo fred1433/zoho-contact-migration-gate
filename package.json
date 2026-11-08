@@ -8,7 +8,7 @@
   "scripts": {
     "generate": "node gate.js generate",
     "rehearse": "node gate.js rehearse",
-    "test": "node --test test/",
+    "test": "node --test test/*.test.js",
     "build": "node scripts/build-site.js"
   }
 }

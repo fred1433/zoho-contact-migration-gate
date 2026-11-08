@@ -24,6 +24,10 @@ export const FAULTS = {
     parts.pop(); rec.Google_Extra_Emails = parts.join('; ');
     if (!rec.Google_Extra_Emails) delete rec.Google_Extra_Emails;
   },
+  'lost-prefix': (s) => {
+    const i = firstWith(s.readback, (r) => r.Salutation);
+    delete s.readback[i].Salutation;
+  },
   'lost-extension': (s) => {
     const i = firstWith(s.readback, (r) => /ext\./.test(r.Phone ?? ''));
     s.readback[i].Phone = s.readback[i].Phone.replace(/\s*ext\.\s*\d+/, '');
@@ -42,6 +46,7 @@ export const FAULTS = {
     s.openCases.push({ source_id: row.source_id, name: person.name, reason: 'Someone asked to review this merge first.', identifiers: [] });
   },
   'archive-altered': (s) => { s.archive.actual = { ...s.archive.actual, 'google-contacts.csv': s.archive.actual['google-contacts.csv'].replace(/^./, (c) => (c === '0' ? '1' : '0')) }; },
+  'manifest-empty': (s) => { s.archive.recorded = {}; },
 };
 
 export const FAULT_NAMES = [...Object.keys(FAULTS), 'wrong-merge'];
